@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma migrate dev --preview-feature
+
+// npx prisma init
+// npx prisma generate 
+// npx prisma migrate dev --name  init    ** atualizar migrate
+// npx prisma migrate dev --name migrate's name    ** atualizar migrate
+// npx prisma db push  
+
+// npx prisma studio  
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Users {
+  id                String @id @default(cuid())
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @updatedAt
+  name              String
+  email             String @unique
+  password          String
+  description       String?
+  urlImage          String?
+  MarketValidations MarketValidations[]
+}
+
+
+/////////////////// MARKET ////////////////////
+model Markets {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @updatedAt
+  name              String   @db.VarChar(255)
+  address           String?
+  latitude          Float?
+  longitude         Float?
+  validated         Boolean @default(false)
+  description       String?
+  urlImage          String?
+  prices            Prices[]
+  MarketValidations MarketValidations[]
+}
+
+model MarketValidations {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime? @default(now())
+  updatedAt     DateTime? @updatedAt
+  user          Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  market        Markets     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  marketId      Int
+}
+/////////////////// MARKET ////////////////////
+
+/////////////////// PRODUCT ////////////////////
+
+model Products {
+  id            Int     @id @default(autoincrement())
+  createdAt     DateTime? @default(now())
+  updatedAt     DateTime? @updatedAt
+  name          String
+  description   String?
+  brand         String?
+  tags          String?
+  categories    String?
+  urlImage      String?
+  prices        Prices[]
+}
+
+model Prices {
+  id          Int      @id @default(autoincrement())
+  product     Products     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int
+  market      Markets     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  marketId    Int
+  value       Float? @default(0.00)
+}
+
+model Categories {
+  id          Int      @id @default(autoincrement())
+  name        String
+}
+
+/////////////////// PRODUCT ////////////////////
